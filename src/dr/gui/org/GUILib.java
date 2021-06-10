@@ -1,12 +1,14 @@
-package dr.gui.org;
+package dr.kingdomrd.org.utils;
 
-//injector version 0.2, last update on 2021/6/5
+//injector version 0.5, last update on 2021/6/10
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -18,9 +20,14 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+import com.google.common.collect.Lists;
 
 public class GUILib implements Listener{
 	
+	
+
 	private static HashMap<Inventory, GUI> activeGUI = new HashMap<>();
 	
 	public static GUI createGUI(String title, int size) {
@@ -57,6 +64,23 @@ public class GUILib implements Listener{
 		});
 	}
 	
+	public static ItemStack getItem(Material display, String name, int amount, String... lore) {
+		ItemStack item = new ItemStack(display);
+		ItemMeta im = item.getItemMeta();
+		im.setDisplayName(name);
+		im.setLore(Arrays.asList(lore));
+		item.setItemMeta(im);
+		return item;
+	}
+	
+	public static ItemStack getItem(Material display, String name, int amount) {
+		ItemStack item = new ItemStack(display);
+		ItemMeta im = item.getItemMeta();
+		im.setDisplayName(name);
+		item.setItemMeta(im);
+		return item;
+	}
+	
 //	@EventHandler
 //	public void onInventoryClose(InventoryCloseEvent e) {
 //		GUI g = activeGUI.get(e.getInventory());
@@ -91,6 +115,10 @@ public class GUILib implements Listener{
 			x -= l.x;
 			y -= l.y;
 			return this;
+		}
+		
+		public UILoc clone() {
+			return new UILoc(x,y);
 		}
 		
 		public static Iterator<UILoc> getLocs(UILoc loc, UILoc offest) {
@@ -150,6 +178,8 @@ public class GUILib implements Listener{
 	
 	public static class GUI {
 		private Inventory inv;
+		String title;
+		
 		HashMap<String, Panel> panels = new HashMap<>();
 		public OnClickListener clickListener;
 		
@@ -158,11 +188,36 @@ public class GUILib implements Listener{
 			GUILib.activeGUI.put(inv, this);
 		}
 		
-		public void setItem(int slot, ItemStack item) {
+		public GUI setItem(int slot, ItemStack item) {
+			if(slot<0||slot>=54) return this;
+			inv.setItem(slot, item);
+			return this;
+		}
+		
+		public void setItem(int slot, Material display, String name, int amount, String... lore) {
+			ItemStack item = new ItemStack(display);
+			ItemMeta im = item.getItemMeta();
+			im.setDisplayName(name);
+			im.setLore(Arrays.asList(lore));
+			item.setItemMeta(im);
 			inv.setItem(slot, item);
 		}
+		
+		public void setItem(int slot, Material display, String name, int amount) {
+			ItemStack item = new ItemStack(display);
+			ItemMeta im = item.getItemMeta();
+			im.setDisplayName(name);
+			item.setItemMeta(im);
+			inv.setItem(slot, item);
+		}
+		
 		public void open(Player player) {
 			player.openInventory(inv);
+			panels.values().forEach(p->{
+				if(p instanceof PersonalPanel) {
+					((PersonalPanel) p).setup(this, player);
+				}
+			});
 		}
 		public List<HumanEntity> getViewers() {
 			return inv.getViewers();
@@ -172,6 +227,29 @@ public class GUILib implements Listener{
 			activeGUI.remove(inv);
 			inv.clear();
 			inv =null;
+		}
+		
+		public GUI clone() {
+			return clone(title,inv.getSize());
+		}
+		
+		public GUI clone(String newTitle) {
+			return clone(newTitle,inv.getSize());
+		}
+		public GUI clone(int newSize) {
+			return clone(title,newSize);
+		}
+		
+		public GUI clone(String newTitle, int newSize) {
+			GUI gui = createGUI(newTitle, newSize);
+			int index = 0;
+			for(ItemStack i : inv.getContents()) {
+				gui.inv.setItem(index, i);
+				index++;
+			}
+			panels.values().forEach(p -> gui.addPanel(p));
+			gui.clickListener = clickListener;
+			return gui;	
 		}
 		
 		public void update() {
@@ -185,6 +263,11 @@ public class GUILib implements Listener{
 		
 		public Panel getPanel(String id) {
 			return panels.get(id);
+		}
+		
+		public <T extends Panel> T getPanel(String id, Class<T> type) {
+		    if(!panels.containsKey(id)) return null;
+			return type.cast(panels.get(id));
 		}
 	}
 	
@@ -285,6 +368,101 @@ public class GUILib implements Listener{
 				else if(backgroundMat!= null) gui.inv.setItem(loc.toInvLoc(), backgroundMat);
 				index++;
 			}
+		}
+		
+	}
+
+	public static class ProgressBarPanel extends Panel {
+		public double progress = 0;
+		public ItemStack progessMat;
+		Orientation orien = Orientation.Vertical;
+		enum Orientation {
+			Vertical,
+			Horizontal
+		}
+		
+		public ProgressBarPanel(String id, UIRegion loc) {
+			super(id, loc);
+			// TODO Auto-generated constructor stub
+		}
+		
+		public ProgressBarPanel(String id, UIRegion loc, ItemStack backgroundMat) {
+			super(id, loc, backgroundMat);
+			// TODO Auto-generated constructor stub
+		}
+		
+		public ProgressBarPanel(String id, UIRegion loc, ItemStack backgroundMat, ItemStack progessMat) {
+			super(id, loc, backgroundMat);
+			// TODO Auto-generated constructor stub
+		}
+		
+		@Override
+		public void update(GUI gui) {
+			Iterator<UILoc> ul = loc.getLocs();
+			while(ul.hasNext()) {
+				UILoc l = ul.next();
+				int p = (orien == Orientation.Vertical ? (l.x-loc.firstL.x)/(loc.secondL.x-loc.firstL.x+1) : 
+					(l.y-loc.firstL.y)/(loc.secondL.y-loc.firstL.y+1));
+				
+				if(progress>=p)
+					gui.inv.setItem(l.toInvLoc(), progessMat);
+				else 
+					gui.inv.setItem(l.toInvLoc(), backgroundMat);
+			}
+		}
+		
+	}
+	
+	public static abstract class PersonalPanel extends Panel{
+
+		public PersonalPanel(String id) {
+			super(id, new UIRegion(-1, -1, -1, -1));
+			// TODO Auto-generated constructor stub
+		}
+		
+		public abstract void setup(GUI gui, Player p);
+		@Override
+		public void update(GUI gui) {
+		}
+	}
+	
+	public static class RelativePanel extends Panel {
+		private GUI g;
+		public HashMap<UILoc, ItemStack> items = new HashMap<>();
+		public RelativePanel(String id, UIRegion loc) {
+			super(id, loc);
+			// TODO Auto-generated constructor stub
+		}
+		
+		public void setItem(ItemStack item, int x,int y) {
+			items.put(new UILoc(x,y),item);
+		}
+		public void setItem(ItemStack item, UILoc loc) {
+			items.put(loc,item);
+		}
+		
+		public void removeItem(int x,int y) {
+			items.remove(new UILoc(x,y));
+		}
+		
+		public void show(boolean clean) {
+			if(g==null) return;
+			if(clean)
+				loc.getLocs().forEachRemaining(l->{ItemStack i = g.inv.getItem(l.toInvLoc()); if(i!=null) i.setAmount(0);});
+			
+			items.keySet().forEach(k->
+			{
+				g.setItem(k.clone().add(k).toInvLoc(), items.get(k));
+			});
+		}
+		
+		public void show() {
+			show(false);
+		}
+		
+		@Override
+		public void update(GUI gui) {
+			g = gui;
 		}
 		
 	}
