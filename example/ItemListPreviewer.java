@@ -52,7 +52,7 @@ public class Main extends JavaPlugin implements Listener {
 			g.setItem(53, new ItemStack(Material.ARROW));
 			g.open(e.getPlayer());
 			
-			g.clickListener = new OnClickListener() {
+			g.clickListener.add(new OnClickListener() {
 				
 				@Override
 				public void run(GUI handler, InventoryClickEvent e) {
@@ -68,7 +68,7 @@ public class Main extends JavaPlugin implements Listener {
 						ipl.update(g);
 					}	
 				}
-			};
+			});
 			ipl.clickListener = new OnPanelClickListener() {
 				
 				@Override
