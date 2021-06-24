@@ -1,11 +1,25 @@
-package dr.kingdomrd.org.utils;
+package dr.gui.org;
 
-//injector version 0.5, last update on 2021/6/10
+//made by Dru_TNT
+/*injector version 1.7, last update on 2021/6/23
+ * 1.7 update on 2021/6/23:
+ *  +add OnOpenListener
+ *  +add RemoveOnNoViewr option (auto release memory, if it's false, you have to do GUI.close() to release ram)
+ * 1.6 update on 2021/6/20:
+ *  #multiClickListener on GUI
+ * 1.5 update on 2021/6/15:
+ *  +clone() method
+ *
+	
+*/
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+
+import javax.annotation.Nullable;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -22,7 +36,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import com.google.common.collect.Lists;
 
 public class GUILib implements Listener{
 	
@@ -45,6 +58,16 @@ public class GUILib implements Listener{
 		if(!activeGUI.containsKey(e.getInventory())||e.getInventory().equals(e.getWhoClicked().getInventory())) return;
 		e.setCancelled(true);
 	}
+	
+	@EventHandler
+	public static void onInventoryClose(InventoryCloseEvent e) {
+		if(!activeGUI.containsKey(e.getInventory())||e.getViewers().size()>1) return;
+//		Bukkit.broadcastMessage(""+e.getViewers().si)
+		GUI g = activeGUI.get(e.getInventory());
+		if(g.removeOnNoView)
+			g.close();
+		
+	}
 	@EventHandler
 	private static void onInventoryClick(InventoryClickEvent e) {
 		GUI g = activeGUI.get(e.getInventory());
@@ -54,8 +77,8 @@ public class GUILib implements Listener{
 				e.getClickedInventory().equals(e.getInventory()))
 			e.setCancelled(true);
 		//panel event first
-		if(g.clickListener!=null)
-		g.clickListener.run(g, e);
+		if(g.clickListener.size()>0)
+			g.clickListener.forEach(c->c.run(g, e));
 		g.panels.values().forEach(p->
 		{
 			UILoc slot = new UILoc(e.getSlot());
@@ -179,17 +202,25 @@ public class GUILib implements Listener{
 	public static class GUI {
 		private Inventory inv;
 		String title;
-		
 		HashMap<String, Panel> panels = new HashMap<>();
-		public OnClickListener clickListener;
 		
-		public GUI(String title, int size) {
+		public boolean removeOnNoView = false;
+		public HashSet<OnClickListener> clickListener = new HashSet<>();
+		public HashSet<OnOpenListener> openListener = new HashSet<>();
+		
+		public GUI(String title, int size, boolean removeOnNoView) {
 			inv = Bukkit.createInventory(null, size, title);
+			this.removeOnNoView = removeOnNoView;
+			this.title = title;
 			GUILib.activeGUI.put(inv, this);
 		}
 		
+		public GUI(String title, int size) {
+			this(title,size,false);
+		}
+		
 		public GUI setItem(int slot, ItemStack item) {
-			if(slot<0||slot>=54) return this;
+			if(slot<0||slot>=inv.getSize()) return this;
 			inv.setItem(slot, item);
 			return this;
 		}
@@ -200,7 +231,7 @@ public class GUILib implements Listener{
 			im.setDisplayName(name);
 			im.setLore(Arrays.asList(lore));
 			item.setItemMeta(im);
-			inv.setItem(slot, item);
+			setItem(slot, item);
 		}
 		
 		public void setItem(int slot, Material display, String name, int amount) {
@@ -208,11 +239,24 @@ public class GUILib implements Listener{
 			ItemMeta im = item.getItemMeta();
 			im.setDisplayName(name);
 			item.setItemMeta(im);
-			inv.setItem(slot, item);
+			setItem(slot, item);
+		}
+		
+		public void setItem(int slot, Material display, String name) {
+			setItem(slot, display,name,1);
 		}
 		
 		public void open(Player player) {
+			if(player.getOpenInventory()!=null) {
+				Inventory i = player.getOpenInventory().getTopInventory();
+				if(i.getViewers().size()==1) {
+					GUI g = activeGUI.get(i);
+					if(g!=null&&g.removeOnNoView) 
+						g.close();
+				}
+			}
 			player.openInventory(inv);
+			openListener.forEach(l->l.run(this, player));
 			panels.values().forEach(p->{
 				if(p instanceof PersonalPanel) {
 					((PersonalPanel) p).setup(this, player);
@@ -227,28 +271,42 @@ public class GUILib implements Listener{
 			activeGUI.remove(inv);
 			inv.clear();
 			inv =null;
+			try {
+				finalize();
+			} catch (Throwable e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		
 		public GUI clone() {
-			return clone(title,inv.getSize());
+			return clone(title,inv.getSize(),removeOnNoView);
 		}
 		
 		public GUI clone(String newTitle) {
-			return clone(newTitle,inv.getSize());
+			return clone(newTitle,inv.getSize(),removeOnNoView);
 		}
 		public GUI clone(int newSize) {
-			return clone(title,newSize);
+			return clone(title,newSize,removeOnNoView);
 		}
 		
+		public GUI clone(boolean removeOnNoView) {
+			return clone(title, inv.getSize(),removeOnNoView);
+		}
 		public GUI clone(String newTitle, int newSize) {
+			return clone(newTitle,newSize,removeOnNoView);
+		}
+		public GUI clone(String newTitle, int newSize,@Nullable boolean removeOnNoView) {
 			GUI gui = createGUI(newTitle, newSize);
 			int index = 0;
 			for(ItemStack i : inv.getContents()) {
-				gui.inv.setItem(index, i);
+				if(index==newSize) break;
+				gui.setItem(index, i);
 				index++;
 			}
 			panels.values().forEach(p -> gui.addPanel(p));
-			gui.clickListener = clickListener;
+			gui.clickListener.addAll(clickListener);
+			gui.removeOnNoView = removeOnNoView;
 			return gui;	
 		}
 		
@@ -271,6 +329,14 @@ public class GUILib implements Listener{
 		}
 	}
 	
+	public static abstract class OnOpenListener {
+		public  OnOpenListener() {
+			
+		}
+		
+		public abstract void run(GUI handler, Player viewer);
+		
+	}
 	public static abstract class OnClickListener {
 		public OnClickListener() {
 			
@@ -318,7 +384,7 @@ public class GUILib implements Listener{
 			Iterator<UILoc> ul = loc.getLocs();
 			while(ul.hasNext()) {
 				UILoc loc = ul.next();
-				gui.inv.setItem(loc.toInvLoc(), backgroundMat);
+				gui.setItem(loc.toInvLoc(), backgroundMat);
 			}
 		}
 		//public onClickListener clickListener;
@@ -338,7 +404,6 @@ public class GUILib implements Listener{
 				gui.setItem(new UILoc(loc.firstL.x,y).toInvLoc(), backgroundMat);
 				gui.setItem(new UILoc(loc.secondL.x,y).toInvLoc(), backgroundMat);
 			}
-			super.update(gui);
 		}
 		
 	}
@@ -350,9 +415,12 @@ public class GUILib implements Listener{
 			super(id, loc);
 		}
 		
+		public int getMaxPage() {
+			return (int) Math.ceil((float)itemList.size()/(float)loc.getSize());
+		}
 		@Override
 		public void update(GUI gui) { 
-			int maxSize = loc.getSize(), maxPage = (int) Math.ceil((float)itemList.size()/(float)maxSize);;
+			int maxSize = loc.getSize(), maxPage = (int) Math.ceil((float)itemList.size()/(float)maxSize);
 			if(page==0) page = maxPage;
 			else if(page>maxPage) page = 1;
 			
@@ -362,10 +430,10 @@ public class GUILib implements Listener{
 			while(ul.hasNext()) {
 				UILoc loc = ul.next();
 				if(itemList.size()>index&&itemList.get(index)!=null) {
-					gui.inv.setItem(loc.toInvLoc(), itemList.get(index));
+					gui.setItem(loc.toInvLoc(), itemList.get(index));
 				}
 					
-				else if(backgroundMat!= null) gui.inv.setItem(loc.toInvLoc(), backgroundMat);
+				else if(backgroundMat!= null) gui.setItem(loc.toInvLoc(), backgroundMat);
 				index++;
 			}
 		}
@@ -405,9 +473,9 @@ public class GUILib implements Listener{
 					(l.y-loc.firstL.y)/(loc.secondL.y-loc.firstL.y+1));
 				
 				if(progress>=p)
-					gui.inv.setItem(l.toInvLoc(), progessMat);
+					gui.setItem(l.toInvLoc(), progessMat);
 				else 
-					gui.inv.setItem(l.toInvLoc(), backgroundMat);
+					gui.setItem(l.toInvLoc(), backgroundMat);
 			}
 		}
 		
