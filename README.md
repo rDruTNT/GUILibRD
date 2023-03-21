@@ -25,7 +25,7 @@ Add following content to your pom.xml:
 ```
 # Example
 [![GUILib 範例影片](https://img.youtube.com/vi/6A59R68TPNc/0.jpg)](https://youtu.be/6A59R68TPNc)
-效果如下：
+
 # Usage
 
 First thing first you have to register your plugin by GUILib.Register(JavaPlugin)
