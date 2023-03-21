@@ -1,5 +1,5 @@
 # GUILibRD
-an light weight gui API with lots of fast utils.
+GUILibRD is a light weight GUI API with a tons of fast utils.
 
 # Installation
 Add following content to your pom.xml:
