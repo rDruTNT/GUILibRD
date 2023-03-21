@@ -24,8 +24,8 @@ Add following content to your pom.xml:
 </dependency>
 ```
 # Example
-[![GUILib 範例影片](https://img.youtube.com/vi/6A59R68TPNc/0.jpg)](https://youtu.be/6A59R68TPNc)
-
+[![GUILib 範例影片]](https://youtu.be/6A59R68TPNc)
+效果如下：
 # Usage
 
 First thing first you have to register your plugin by GUILib.Register(JavaPlugin)
@@ -36,11 +36,9 @@ First thing first you have to register your plugin by GUILib.Register(JavaPlugin
   }
 ```
 
-To create a GUI, create it with title, size
+To create a GUI use new a GUI with title, size and <init>
 ```java
   new GUI("A GUI Title", 54);
-  
-  //on start init method
   new GUI("A GUI Title", (ActiveGUI gui)->{
     //init your variable like icon or panel to point to address correctly 
     //if the GUI is reference to a static var, 
@@ -85,4 +83,10 @@ Extension of UIPanel can help you do some trick easily like:
       - TogglePanel
       - ValuePanel  
 
-Please contact me if you want to know how these panels work.
+In the end you will need to open the GUI to player 
+Simply use GUI#open(Player) to open a gui to this player and get its instantiated acitve gui
+```java
+      ActiveGUI actives = GUI.open(player);
+```
+      
+Please contact me if you want to know how the details work.
