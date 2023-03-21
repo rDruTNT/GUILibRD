@@ -23,6 +23,8 @@ Add following content to your pom.xml:
   <version>2.0-SNAPSHOT</version>
 </dependency>
 ```
+# Example
+![alt 影片](https://youtu.be/6A59R68TPNc)
 # Usage
 
 First thing first you have to register your plugin by GUILib.Register(JavaPlugin)
@@ -41,11 +43,14 @@ To create a GUI use new a GUI with title, size and <init>
     //if the GUI is reference to a static var, 
     //init your component here or the component will not be reset on open.
     });
+      
+ // if you wish to play sound on click use
+ gui.setGlobalClickListener((PanelClickEvent event)->{event.player.playSound(sound);});
 ```
 
 To set component on GUI, use GUI#setIcon(slot, icon) or GUI#addPanel(region, panel)
 
-To set a single Item, you can Icon or StatefulIcon.
+To set a single Item, you can Icon or StatefulIcon and assignation the slot either by 0~53 or UILoc(x,y), the origin starts from left top to right bottom.
 ```java
   //Icon is a stateless component it cannot update once instantiate.
   gui.setIcon(4, Icon of(Material display, String name, int amount, String... lore));
@@ -53,26 +58,28 @@ To set a single Item, you can Icon or StatefulIcon.
   gui.setIcon(UILoc.of(4,0), new StatefulIcon((Player player)->{return getPlayerHead(player);}));
 ```
 
+To set a group of Items, you can use UIPanel(Icon).
+Use UIRegion(x1, y1, x2, y2) or UIRegion(UILoc, UILoc)  to set the region.
+```java
+  gui.addPanel(new UIRegion.single(2,2),new UIPanel(Icon.of(itemstack)));
+      
+  //if you wish to do some custom event, use
+  panel.setClickListener((PanelClickEvent event)->event.player.sendMessage("you clicked this panel"));
+```   
+If you want some other event, theres:
+      - PanelClickEvent
+      - ShowcaseChangeEvent
+      - GUICloseEvent
+      - GUIDisposeEvent
+      
+Extension of UIPanel can help you do some trick easily like:
+      - BorderPanel
+      - ButtonPanel
+      - IconListPanel
+      - IntegerLeverPanel
+      - ProgressBarPanel
+      - ShowcasePanel
+      - TogglePanel
+      - ValuePanel  
 
-GUI gui = GUILib.createGUI(name, size, autoRemove?);
-
-in the GUI you can simply set Item by setItem(), its convinent that we can make it a line to finish setting with (Material display, String name, int amount, String... lore)
-or make some event with OnClickListener and OnOpenListener.
-
-the more complex is Panel. It's the compements of GUI.
-
-
-The GUI is not personal as its designed, so you have to do the things on OpenListener event to make diffrence appaerance on different player.
-
-And the most important things is that autoRemove is false as default, if means than you have to release its memory by manually.
-
-## GUI
-
-the GUI of create, so do GUILib.createGUI() and directly new GUI() is possible due to there's no matter now (maybe in future new GUI() will be private)
-
-Method
-* clone(newTitle, newSize, autoRemove)
-* create  
-
-#Class UML:
-![bLLDR-8m4BtdLupeXIwXshqZohPKMwHM8A2zcsIKMdNio7PeQPV_lcCxX8JGIdi1pyppytndOYpJjin555bk1SAVfza3toodC8HRmOo1AMUPPdaKHOcN2G2V4S3WdfcN5ThHNDuAdhm-S6DHeXv3qXJRo7c1yWXK3ObmmvdSehHAxqXOMSrb1juf4Xt58oj6isaC2oPHZA5mVyRnRnLF](https://user-images.githubusercontent.com/70189787/123243094-45fa6780-d515-11eb-8973-112b2ec369e7.png)
+Please contact me if you want to know how these panels work.
