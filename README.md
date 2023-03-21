@@ -24,7 +24,7 @@ Add following content to your pom.xml:
 </dependency>
 ```
 # Example
-![alt 影片](https://youtu.be/6A59R68TPNc)
+(https://youtu.be/6A59R68TPNc)
 # Usage
 
 First thing first you have to register your plugin by GUILib.Register(JavaPlugin)
