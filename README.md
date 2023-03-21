@@ -1,9 +1,57 @@
 # GUILibRD
 an light weight API.
 
+# Installation
+Add following content to your pom.xml:
+```
+      <repositories>  
+        <repository>
+          <id>rDruTNT-DruRespositories</id>
+          <url>https://packagecloud.io/rDruTNT/DruRespositories/maven2</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </repository>
+      <repositories>
+      
+<dependency>
+  <groupId>GUILibRD</groupId>
+  <artifactId>guilibrd</artifactId>
+  <version>2.0-SNAPSHOT</version>
+</dependency>
+```
 # Usage
 
-first thing you have to get a GUI by this:
+First thing first you have to register your plugin by GUILib.Register(JavaPlugin)
+```java
+  @Override
+  public void onEnable() {
+    GUILib.register(this);
+  }
+```
+
+To create a GUI use new a GUI with title, size and <init>
+```java
+  new GUI("A GUI Title", 54);
+  new GUI("A GUI Title", (ActiveGUI gui)->{
+    //init your variable like icon or panel to point to address correctly
+    });
+```
+
+To set component on GUI, use GUI#setIcon(slot, icon) or GUI#addPanel(region, panel)
+
+To set a single Item, you can Icon or StatefulIcon.
+```java
+  //Icon is a stateless component it cannot update once instantiate.
+  gui.setIcon(4, Icon of(Material display, String name, int amount, String... lore));
+  //StatefulIcon is a icon with player scope, use this if you want it to be difference with different player.  
+  gui.setIcon(UILoc.of(4,0), new StatefulIcon((Player player)->{return getPlayerHead(player);}));
+```
+
+
 GUI gui = GUILib.createGUI(name, size, autoRemove?);
 
 in the GUI you can simply set Item by setItem(), its convinent that we can make it a line to finish setting with (Material display, String name, int amount, String... lore)
