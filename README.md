@@ -68,20 +68,20 @@ Use UIRegion(x1, y1, x2, y2) or UIRegion(UILoc, UILoc)  to set the region.
   panel.setClickListener((PanelClickEvent event)->event.player.sendMessage("you clicked this panel"));
 ```   
 If you want some other event, theres:
-      - PanelClickEvent
-      - ShowcaseChangeEvent
-      - GUICloseEvent
-      - GUIDisposeEvent
+- PanelClickEvent
+- ShowcaseChangeEvent
+- GUICloseEvent
+- GUIDisposeEvent
       
 Extension of UIPanel can help you do some trick easily like:
-      - BorderPanel
-      - ButtonPanel
-      - IconListPanel
-      - IntegerLeverPanel
-      - ProgressBarPanel
-      - ShowcasePanel
-      - TogglePanel
-      - ValuePanel  
+- BorderPanel
+- ButtonPanel
+- IconListPanel
+- IntegerLeverPanel
+- ProgressBarPanel
+- ShowcasePanel
+- TogglePanel
+- ValuePanel  
 
 In the end you will need to open the GUI to player 
 Simply use GUI#open(Player) to open a gui to this player and get its instantiated acitve gui
