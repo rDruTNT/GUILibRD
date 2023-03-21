@@ -37,7 +37,7 @@ To create a GUI use new a GUI with title, size and <init>
 ```java
   new GUI("A GUI Title", 54);
   new GUI("A GUI Title", (ActiveGUI gui)->{
-    //init your variable like icon or panel to point to address correctly
+    //init your variable like icon or panel to point to address correctly if the GUI is reference to a static var, init your component here or the component will not be reset on open.
     });
 ```
 
