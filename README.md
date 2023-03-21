@@ -36,7 +36,7 @@ First thing first you have to register your plugin by GUILib.Register(JavaPlugin
   }
 ```
 
-To create a GUI use new a GUI with title, size
+To create a GUI, create it with title, size
 ```java
   new GUI("A GUI Title", 54);
   
