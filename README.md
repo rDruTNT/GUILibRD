@@ -55,7 +55,7 @@ To set a single Item, you can Icon or StatefulIcon and assignation the slot eith
 ```java
   //Icon is a stateless component it cannot update once instantiate.
   gui.setIcon(4, Icon of(Material display, String name, int amount, String... lore));
-  //StatefulIcon is a icon with player scope, use this if you want it to be difference with different player.  
+  //StatefulIcon is a icon with player scoped, use this if you want it to be difference with different player.  
   gui.setIcon(UILoc.of(4,0), new StatefulIcon((Player player)->{return getPlayerHead(player);}));
 ```
 
