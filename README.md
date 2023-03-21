@@ -24,7 +24,7 @@ Add following content to your pom.xml:
       </dependency>
 ```
 # Example
-[![GUILib 範例影片]](https://youtu.be/6A59R68TPNc)
+[![GUILib 範例影片](https://img.youtube.com/vi/6A59R68TPNc/0.jpg)](https://youtu.be/6A59R68TPNc)
 效果如下：
 # Usage
 
