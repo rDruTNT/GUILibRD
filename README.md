@@ -49,7 +49,7 @@ To create a GUI use new a GUI with title, size and <init>
  gui.setGlobalClickListener((PanelClickEvent event)->{event.player.playSound(sound);});
 ```
 
-To set component on GUI, use GUI#setIcon(slot, icon) or GUI#addPanel(region, panel)
+To assign component on GUI, use GUI#setIcon(slot, icon) or GUI#addPanel(region, panel)
 
 To set a single Item, you can Icon or StatefulIcon and assignation the slot either by 0~53 or UILoc(x,y), the origin starts from left top to right bottom.
 ```java
