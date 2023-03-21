@@ -83,7 +83,7 @@ Extension of UIPanel can help you do some trick easily like:
 - TogglePanel
 - ValuePanel  
 
-In the end you will need to open the GUI to player 
+In the end you will need to open the GUI to player \n
 Simply use GUI#open(Player) to open a gui to this player and get its instantiated acitve gui
 ```java
       ActiveGUI actives = GUI.open(player);
