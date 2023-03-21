@@ -17,11 +17,11 @@ Add following content to your pom.xml:
         </repository>
       <repositories>
       
-<dependency>
-  <groupId>GUILibRD</groupId>
-  <artifactId>guilibrd</artifactId>
-  <version>2.0-SNAPSHOT</version>
-</dependency>
+      <dependency>
+        <groupId>GUILibRD</groupId>
+        <artifactId>guilibrd</artifactId>
+        <version>2.0-SNAPSHOT</version>
+      </dependency>
 ```
 # Example
 [![GUILib 範例影片]](https://youtu.be/6A59R68TPNc)
