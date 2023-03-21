@@ -39,6 +39,8 @@ First thing first you have to register your plugin by GUILib.Register(JavaPlugin
 To create a GUI use new a GUI with title, size
 ```java
   new GUI("A GUI Title", 54);
+  
+  //on start init method
   new GUI("A GUI Title", (ActiveGUI gui)->{
     //init your variable like icon or panel to point to address correctly 
     //if the GUI is reference to a static var, 
